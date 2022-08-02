@@ -1,0 +1,354 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("SHADOW_DATABASE_URL")
+}
+
+
+model Permissions {
+  id             String           @id @default(auto()) @map("_id") @db.ObjectId
+  slug           String?          @unique
+  title          String?
+  actions        String[]
+  parents        String?
+  created_at     DateTime
+  updated_at     DateTime
+  deleted_at     DateTime
+  User           User?            @relation(fields: [userId], references: [id])
+  userId         String?
+  RolePermission RolePermission[]
+}
+
+model User {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  email       String?       @unique
+  name        String?
+  password    String?
+  mobile      String?
+  address     Address[]
+  permission  Permissions[]
+  expenses    Expanses[]
+  employees   Employee[]
+  departments Department[]
+  roleId      String?
+  userId      String?
+  created_at  DateTime
+  updated_at  DateTime
+  deleted_at  DateTime
+}
+
+model Warehouse {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  title     String?
+  staff     String?
+  addressId String[]
+  incharge  String?
+  userId    String?
+  products  Product[]
+  racks     Racks[]
+}
+
+model Racks {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
+  code        String?
+  length      String?
+  width       String?
+  height      String?
+  side        String?
+  shelf       Shelf[]
+  userId      String?
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouseId String
+  created_at  DateTime
+  updated_at  DateTime
+  deleted_at  DateTime
+}
+
+model Shelf {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  code           String?
+  length         String?
+  width          String?
+  height         String?
+  side           String?
+  totalSpace     String?
+  availableSpace String?
+  Product        Product[]
+  racks          Racks     @relation(fields: [rackId], references: [id])
+  rackId         String
+  userId         String?
+  created_at     DateTime
+  updated_at     DateTime
+  deleted_at     DateTime
+}
+
+model Product {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  sku            String?   @unique
+  title          String?
+  short_desc     String?
+  desc           String?
+  bulletPoints   String[]
+  categories     String[]
+  variation      String[]
+  images         String[]
+  price          String[]
+  quantity       String[]
+  purchase_price String[]
+  userId         String?
+  warehouse      Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouseId    String
+  shelf          Shelf     @relation(fields: [shelfId], references: [id])
+  shelfId        String
+  created_at     DateTime
+  updated_at     DateTime
+  deleted_at     DateTime
+}
+
+model Role {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  title      String?
+  userId     String?
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime
+}
+
+model RolePermission {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  roleId       String?
+  permission   Permissions @relation(fields: [permissionId], references: [id])
+  permissionId String
+  created_at   DateTime
+  updated_at   DateTime
+  deleted_at   DateTime
+}
+
+model PO {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  poStatus            String?
+  paymentStatus       String?
+  paindAmount         String?
+  pendingAmount       String?
+  totalPrice          String?
+  totalTax            String?
+  totalDiscount       String?
+  totalTransportation String?
+  totalExpenses       String?
+  poItem              POItems[]
+  userId              String?
+  vendorId            String?
+  created_at          DateTime
+  updated_at          DateTime
+  deleted_at          DateTime
+}
+
+model POItems {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  sku            String?
+  title          String?
+  short_desc     String?
+  desc           String?
+  categories     String[]
+  variation      String[]
+  images         String[]
+  price          String[]
+  taxRate        String[]
+  taxAmount      String[]
+  discountAmount String[]
+  quantity       String[]
+  po             PO       @relation(fields: [poId], references: [id])
+  poId           String
+  created_at     DateTime
+  updated_at     DateTime
+  deleted_at     DateTime
+}
+
+model Invoice {
+  id                  String         @id @default(auto()) @map("_id") @db.ObjectId
+  invoiceStatus       String?
+  paymentStatus       String?
+  paindAmount         String?
+  pendingAmount       String?
+  totalPrice          String?
+  totalTax            String?
+  totalDiscount       String?
+  totalTransportation String?
+  totalExpenses       String?
+  invoiceItems        InvoiceItems[]
+  buyerId             String?
+  userId              String?
+  created_at          DateTime
+  updated_at          DateTime
+  deleted_at          DateTime
+}
+
+model InvoiceItems {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  sku            String?
+  title          String?
+  short_desc     String?
+  desc           String?
+  categories     String[]
+  variation      String[]
+  images         String[]
+  price          String[]
+  taxRate        String[]
+  taxAmount      String[]
+  discountAmount String[]
+  quantity       String[]
+  invoice        Invoice  @relation(fields: [invoiceId], references: [id])
+  invoiceId      String
+  created_at     DateTime
+  updated_at     DateTime
+  deleted_at     DateTime
+}
+
+model Order {
+  id                  String       @id @default(auto()) @map("_id") @db.ObjectId
+  orderStatus         String?
+  paymentStatus       String?
+  paindAmount         String?
+  pendingAmount       String?
+  totalPrice          String?
+  totalTax            String?
+  totalDiscount       String?
+  totalTransportation String?
+  totalExpenses       String?
+  orderItems          OrderItems[]
+  buyerId             String?
+  userId              String?
+  created_at          DateTime
+  updated_at          DateTime
+  deleted_at          DateTime
+}
+
+model OrderItems {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  sku            String?
+  title          String?
+  short_desc     String?
+  desc           String?
+  categories     String[]
+  variation      String[]
+  images         String[]
+  price          String[]
+  taxRate        String[]
+  taxAmount      String[]
+  discountAmount String[]
+  quantity       String[]
+  order          Order    @relation(fields: [orderId], references: [id])
+  orderId        String
+  created_at     DateTime
+  updated_at     DateTime
+  deleted_at     DateTime
+}
+
+model PaymentSlips {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  paymentType   String?
+  paymentTypeId String?
+  paidAmount    String?
+  paymentMode   String?
+  paymentStatus String?
+  paidBy        String?
+  userId        String?
+  created_at    DateTime
+  updated_at    DateTime
+  deleted_at    DateTime
+}
+
+model Address {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  type         String?
+  addressTitle String?
+  addressLine  String?
+  addressLine1 String?
+  addressLine2 String?
+  landmark     String?
+  city         String?
+  state        String?
+  country      String?
+  pincode      String?
+  mobile       String?
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  created_at   DateTime
+  updated_at   DateTime
+  deleted_at   DateTime
+}
+
+model Expanses {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  title        String?
+  expensesType String?
+  amount       String?
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  created_at   DateTime
+  updated_at   DateTime
+  deleted_at   DateTime
+}
+
+model Employee {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  title        String?
+  department   Department   @relation(fields: [departmentId], references: [id])
+  departmentId String
+  monthlyPay   String?
+  yearlyPay    String?
+  salary       Salary[]
+  user         User         @relation(fields: [userId], references: [id])
+  userId       String
+  created_at   DateTime
+  updated_at   DateTime
+  deleted_at   DateTime
+  Attendance   Attendance[]
+}
+
+model Department {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  title      String?
+  employees  Employee[]
+  user       User       @relation(fields: [userId], references: [id])
+  userId     String
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime
+
+}
+
+model Attendance {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  title      String?
+  from       String?
+  to         String?
+  presents   String?
+  absents    String?
+  paidLeaves String?
+  Salary     Salary?   @relation(fields: [salaryId], references: [id])
+  salaryId   String?
+  Employee   Employee? @relation(fields: [employeeId], references: [id])
+  employeeId String?
+  userId     String?
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime
+}
+
+model Salary {
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  title        String?
+  expensesType String?
+  amount       String?
+  from         String?
+  to           String?
+  attendance   Attendance[]
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+  employeeId   String
+  userId       String?
+  created_at   DateTime
+  updated_at   DateTime
+  deleted_at   DateTime
+}
